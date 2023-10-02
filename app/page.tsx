@@ -1,113 +1,186 @@
-import Image from 'next/image'
+'use client'
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import axios from 'axios';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Separator } from "@/components/ui/separator"
+
+const DetailSchema = z.object({
+  cid: z.string().regex(/^Qm[a-zA-Z0-9]{44}$/, "Invalid CID"),
+  address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Address"),
+  signature: z.string().regex(/^0x[a-fA-F0-9]{130}$/, "Invalid Signature")
+});
+type DetailFormValues = z.infer<typeof DetailSchema>;
+
+const IdSchema = z.object({
+  verificationId: z.string().regex(/^[a-fA-F0-9]{40}$/, "Invalid Verification ID"),
+});
+type IdFormValues = z.infer<typeof IdSchema>;
 
 export default function Home() {
+  const router = useRouter()
+
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
+  const handleDetailSubmit = async (data: DetailFormValues) => {
+    setIsLoadingDetail(true);
+    
+    try {
+      const response = await axios.post('/api/verify', {
+        cid: data.cid,
+        address: data.address,
+        signature: data.signature
+      });
+  
+      if(response.data.success) {
+        console.log(response.data);
+        router.push(`/${response.data.verificationId}`);
+      } else {
+        alert("Verification failed.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while verifying content.");
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  };
+
+  const handleIdSubmit = async (data: IdFormValues) => {
+    router.push(`/${data.verificationId}`);
+  }
+
+  const DetailForm = useForm<DetailFormValues>({
+    resolver: zodResolver(DetailSchema)
+  });
+
+  const IdForm = useForm<IdFormValues>({
+    resolver: zodResolver(IdSchema)
+  });
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className="flex min-h-screen flex-col items-center justify-between p-24 w-full">
+      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-10 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[250px] z-[-1]">
+        <h1 className='relative dark:drop-shadow-[0_0_0.1rem_#ffffff70] mb-20 text-5xl font-bold'>Blockto Content Verification</h1>
+      </div>
+
+      <div className="rounded border shadow">
+        <div className="p-12">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr' }} >
+            <div>
+              <h1 className="text-xl font-semibold pb-1 mr-12">Using CID, Address and Signature</h1>
+              <p className="text-sm text-muted-foreground mr-12">
+                Manually verify a content by providing its CID, creator's address and signature.
+              </p>
+              <Separator orientation="horizontal" className="my-6" />
+              <Form {...DetailForm}>
+                <form onSubmit={DetailForm.handleSubmit(handleDetailSubmit)} className="space-y-6 mr-12">
+                  <FormField
+                    control={DetailForm.control}
+                    name="cid"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>CID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="QmdSRKWwspnMPnshmLHYfteKtC8hmL68wSiuwuEWEkFkur" {...field} autoComplete="off" />
+                        </FormControl>
+                        <FormDescription>
+                          The IPFS Content Identifier of the content.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={DetailForm.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Address</FormLabel>
+                        <FormControl>
+                          <Input placeholder="0xAcC24C0231E34756D02634E0E83326922f1b424b" {...field} autoComplete="off" />
+                        </FormControl>
+                        <FormDescription>
+                          The wallet address of the content creator.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={DetailForm.control}
+                    name="signature"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Signature</FormLabel>
+                        <FormControl>
+                          <Input placeholder="0x2a8a8f9cae7df36b390b87e8533ba32e011a62be33f8287fd5773d7111b18b687ebbf7f999729e1b6ff51bd70aa54bc7f0a253577e2c2c6400ba2dfdd04162d41b" {...field} autoComplete="off" />
+                        </FormControl>
+                        <FormDescription>
+                          The cryptographic signature of the content's CID.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" disabled={isLoadingDetail}>
+                    {isLoadingDetail ? 'Verifying...' : 'Verify'}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+
+            <Separator orientation="vertical" />
+            <div>
+              <h1 className="text-xl font-semibold pb-1 ml-12">Using Verification ID</h1>
+              <p className="text-sm text-muted-foreground ml-12">
+                Verify a content directly using it's verificarion ID provided by Blockto.
+              </p>
+              <Separator orientation="horizontal" className="my-6" />
+              <Form {...IdForm}>
+                <form onSubmit={IdForm.handleSubmit(handleIdSubmit)} className="space-y-6 ml-12">
+                  <FormField
+                    control={IdForm.control}
+                    name="verificationId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Verification ID</FormLabel>
+                        <FormControl>
+                          <Input placeholder="4a5aa878184cfc30f3c38435b9c2601783fac907" {...field} autoComplete="off" />
+                        </FormControl>
+                        <FormDescription>
+                          The Verification ID provided by Blockto
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit">Verify</Button>
+                </form>
+              </Form>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
     </main>
   )
 }
