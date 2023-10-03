@@ -21,6 +21,7 @@ import {
   HoverCardTrigger
 } from "@/components/ui/hover-card"
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link'
 
 type ReplyingToDB = {
@@ -74,7 +75,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
   const [postData, setPostData] = useState<AllPostData | null>(null);
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [copied, setCopied] = useState(false);
 
   const router = useRouter();
@@ -102,6 +103,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
         const response = await axios.get(`/api/post/${params.id}`);
         console.log(response.data);
 
@@ -112,6 +114,8 @@ export default function VerificationPage({ params }: { params: { id: string } })
       } catch (error) {
         console.error('Error fetching post data:', error);
         setHasError(true);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -120,7 +124,16 @@ export default function VerificationPage({ params }: { params: { id: string } })
 
   return (
     <div className="flex justify-center items-center min-h-full overflow-auto">
-      {isVerified ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center w-full mt-20">
+          <Skeleton className="h-[300px] w-[300px] rounded-full mb-8" />
+          <div className="flex flex-col items-start space-y-4 mb-8">
+            <Skeleton className="h-4 w-[250px]" />
+            <Skeleton className="h-4 w-[200px]" />
+          </div>
+          <Skeleton className="h-[300px] w-[500px] mt-8" />
+        </div>
+      ) : isVerified ? (
         <div className="flex flex-col items-center w-full">
           <div className="flex space-x-6 mt-20" style={{ marginLeft: '-160px' }}>
             <div className="flex flex-col items-start max-w-[250px]">
@@ -164,8 +177,6 @@ export default function VerificationPage({ params }: { params: { id: string } })
               {postData?.post.creator?.website && (
                 <div className="flex items-center space-x-1 mt-4">
                   <LinkIcon className="h-4 w-4 text-violet-500" />
-                  {/* <ClipboardDocumentIcon className="h-4 w-4" />
-                  <ClipboardDocumentCheckIcon className="h-4 w-4" /> */}
                   <Link
                     href={postData.post.creator.website}
                     target="_blank"
@@ -187,7 +198,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
             <HoverCard>
               <HoverCardTrigger>
                 <Card
-                  className="mt-8 max-w-[730px] min-w-[350px] hover:border-zinc-500 transition-all"
+                  className="mt-8 max-w-[730px] min-w-[350px] min-h-[100px] hover:border-zinc-500 transition-all"
                   onClick={() => window.open(`https://blockto.in/post${postData?.post.cid}`, '_blank')}
                 >
                   <CardContent className="flex relative">
@@ -197,9 +208,14 @@ export default function VerificationPage({ params }: { params: { id: string } })
                       post_cid={postData.post.cid}
                       standalone={true}
                     />
+                    <img
+                      src="/verified.png"
+                      alt="Verified"
+                      className="absolute top-5 right-2 h-7 w-7"
+                    />
                     <HoverCard>
                       <HoverCardTrigger>
-                        <div className="absolute top-5 right-3">
+                        <div className="absolute top-14 right-3">
                           <button
                             onClick={(e) => handleCopy(e)}
                             className='focus:outline-none'
