@@ -243,7 +243,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
         </div>
 
       ) : isVerified === false ? (
-        <Card className="bg-black text-white w-[425px]">
+        <Card className="bg-black text-white w-[425px] mt-80">
           <CardHeader className='text-center text-bold text-lg'>
             <CardTitle>VERIFICATION FAILED</CardTitle>
           </CardHeader>
