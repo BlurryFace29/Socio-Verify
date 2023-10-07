@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Blockto Content Verification',
-  description: 'Become the decentralizer of the worlds',
+  description: 'Ensuring Content Authenticity in the Age of Deepfakes',
 }
 
 export default function RootLayout({
