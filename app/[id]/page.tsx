@@ -143,7 +143,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
                   <HoverCard>
                     <HoverCardTrigger>
                       <Link
-                        href={`https://blockto.in/${postData.post.creator.address}`}
+                        href={`https://socio.blurrys.in/${postData.post.creator.address}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="hover:underline text-zinc-500"
@@ -152,7 +152,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
                       </Link>
                     </HoverCardTrigger>
                     <HoverCardContent className="bg-black w-52">
-                      Checkout his profile on Blockto
+                      Checkout his profile on Socio
                     </HoverCardContent>
                   </HoverCard>
                 </>
@@ -160,7 +160,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
                 <HoverCard>
                   <HoverCardTrigger>
                     <Link
-                      href={`https://blockto.in/${postData?.post.creator.address}`}
+                      href={`https://socio.blurrys.in/${postData?.post.creator.address}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="hover:underline"
@@ -169,7 +169,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
                     </Link>
                   </HoverCardTrigger>
                   <HoverCardContent className="bg-black w-52">
-                    Checkout his profile on Blockto
+                    Checkout his profile on Socio
                   </HoverCardContent>
                 </HoverCard>
               )}
@@ -199,7 +199,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
               <HoverCardTrigger>
                 <Card
                   className="mt-8 max-w-[730px] min-w-[350px] min-h-[100px] hover:border-zinc-500 transition-all"
-                  onClick={() => window.open(`https://blockto.in/post${postData?.post.cid}`, '_blank')}
+                  onClick={() => window.open(`https://socio.blurrys.in/post${postData?.post.cid}`, '_blank')}
                 >
                   <CardContent className="flex relative">
                     <PostContent
@@ -236,7 +236,7 @@ export default function VerificationPage({ params }: { params: { id: string } })
                 </Card>
               </HoverCardTrigger>
               <HoverCardContent className="bg-black w-52">
-                Checkout this post on Blockto
+                Checkout this post on Socio
               </HoverCardContent>
             </HoverCard>
           )}
