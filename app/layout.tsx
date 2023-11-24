@@ -6,8 +6,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Blockto Content Verification',
-  description: 'Ensuring Content Authenticity in the Age of Deepfakes',
+  title: 'Socio Content Verification',
+  description: 'Ensuring Content Authenticity',
 }
 
 export default function RootLayout({
